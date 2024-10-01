@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            text-align: center;
+        }
+        #softwareName {
+            width: 300px;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #results {
+            margin-top: 20px;
+        }
+        .result-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: white;
+        }
+        .download-link {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .download-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="color: #333;">谦的废物搜索</h1>
+        <input type="text" id="softwareName" placeholder="输入软件名">
+        <button onclick="searchSoftware()">搜索</button>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        function searchSoftware() {
+            var softwareName = document.getElementById('softwareName').value;
+            var page = 1; // 假设我们只展示第一页
+            var limit = 10; // 每页显示10条数据
+
+            var apiUrl = `https://api.cenguigui.cn/api/huluxia/?msg=${encodeURIComponent(softwareName)}&page=${page}&limit=${limit}`;
+
+            fetch(apiUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('网络响应错误');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    var resultsContainer = document.getElementById('results');
+                    resultsContainer.innerHTML = ''; // 清空之前的搜索结果
+
+                    if (data.code === 200) {
+                        if (data.data && data.data.length > 0) {
+                            data.data.forEach(item => {
+                                var resultItem = document.createElement('div');
+                                resultItem.className = 'result-item';
+                                resultItem.innerHTML = `
+                                    <h3>${item.name}</h3>
+                                    <p>版本: ${item.version}</p>
+                                    <p>大小: ${item.size} MB</p>
+                                    <p>授权: ${item.appauthorization}</p>
+                                    <p>类别: ${item.categoryname}</p>
+                                    <p>描述: ${item.desc}</p>
+                                    <a href="${item.download}" class="download-link" target="_blank">下载软件</a>
+                                `;
+                                resultsContainer.appendChild(resultItem);
+                            });
+                        } else {
+                            resultsContainer.innerHTML = `<p>没有找到相关软件。</p>`;
+                        }
+                    } else {
+                        resultsContainer.innerHTML = `<p>请求失败: ${data.msg}</p>`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('results').innerHTML = `<p>请求失败: ${error.message}</p>`;
+                });
+        }
+    </script>
+</body>
+</html>
